@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="EdocsTestTask.Shared/EdocsTestTask.Shared.csproj" />
+    <Project Path="EdocsTestTask.Core/EdocsTestTask.Core.csproj" />
+    <Project Path="EdocsTestTask.Infrastructure/EdocsTestTask.Infrastructure.csproj" />
+    <Project Path="EdocsTestTask.Api/EdocsTestTask.Api.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="EdocsTestTask.Tests/EdocsTestTask.Tests.csproj" />
+  </Folder>
+</Solution>

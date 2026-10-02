@@ -1,0 +1,67 @@
+@EdocsTestTask.Api_HostAddress = http://localhost:5113
+
+# Static test tokens, valid until 2027-10-01T00:00:00Z. See README.md, section "Автентифікація".
+# author-1 / Author
+@authorToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJFZG9jc1Rlc3RUYXNrLkFwaSIsImlzcyI6IkVkb2NzVGVzdFRhc2siLCJleHAiOjE4MjIzNDg4MDAsImlhdCI6MTc5MDg4NzIyNiwibmJmIjoxNzkwODg3MjI2LCJzdWIiOiJhdXRob3ItMSIsInJvbGUiOiJBdXRob3IifQ.qfo6QOPpu0ZK5tE3wzawUeNSj8DCTmTR04UvAQVjDj0
+# approver-1 / Approver
+@approverToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJFZG9jc1Rlc3RUYXNrLkFwaSIsImlzcyI6IkVkb2NzVGVzdFRhc2siLCJleHAiOjE4MjIzNDg4MDAsImlhdCI6MTc5MDg4NzIyNiwibmJmIjoxNzkwODg3MjI2LCJzdWIiOiJhcHByb3Zlci0xIiwicm9sZSI6IkFwcHJvdmVyIn0.M6pJ_O46DpsjMulC0Rn4rAPckHj6PokOJzfUGT7ah9I
+# approver-2 / Approver (not the assignee; use it to check 403)
+@otherApproverToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJFZG9jc1Rlc3RUYXNrLkFwaSIsImlzcyI6IkVkb2NzVGVzdFRhc2siLCJleHAiOjE4MjIzNDg4MDAsImlhdCI6MTc5MDg4NzIyNiwibmJmIjoxNzkwODg3MjI2LCJzdWIiOiJhcHByb3Zlci0yIiwicm9sZSI6IkFwcHJvdmVyIn0.rRwiiq-BlxFI2Y2AgCz8N6F7CpqKr8iYYs9c2gVTz1I
+
+GET {{EdocsTestTask.Api_HostAddress}}/health
+
+###
+### Create approval task (Author)
+# @name createTask
+POST {{EdocsTestTask.Api_HostAddress}}/api/approval-tasks
+Authorization: Bearer {{authorToken}}
+Content-Type: application/json
+
+{
+  "documentNumber": "DOC-2026-001",
+  "title": "Supply contract",
+  "assigneeId": "approver-1"
+}
+
+### Start (assigned Approver)
+POST {{EdocsTestTask.Api_HostAddress}}/api/approval-tasks/{{createTask.response.body.$.data.id}}/actions
+Authorization: Bearer {{approverToken}}
+Content-Type: application/json
+
+{
+  "action": "Start"
+}
+
+### Reject without comment -> 400
+POST {{EdocsTestTask.Api_HostAddress}}/api/approval-tasks/{{createTask.response.body.$.data.id}}/actions
+Authorization: Bearer {{approverToken}}
+Content-Type: application/json
+
+{
+  "action": "Reject"
+}
+
+### Another approver -> 403
+POST {{EdocsTestTask.Api_HostAddress}}/api/approval-tasks/{{createTask.response.body.$.data.id}}/actions
+Authorization: Bearer {{otherApproverToken}}
+Content-Type: application/json
+
+{
+  "action": "Approve"
+}
+
+### Approve (assigned Approver)
+POST {{EdocsTestTask.Api_HostAddress}}/api/approval-tasks/{{createTask.response.body.$.data.id}}/actions
+Authorization: Bearer {{approverToken}}
+Content-Type: application/json
+
+{
+  "action": "Approve",
+  "comment": "Looks good"
+}
+
+### Get task with history
+GET {{EdocsTestTask.Api_HostAddress}}/api/approval-tasks/{{createTask.response.body.$.data.id}}
+Authorization: Bearer {{authorToken}}
+
+###
